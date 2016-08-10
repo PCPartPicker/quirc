@@ -98,8 +98,8 @@ static void perspective_map(const double *c,
 	double x = (c[0]*u + c[1]*v + c[2]) / den;
 	double y = (c[3]*u + c[4]*v + c[5]) / den;
 
-	ret->x = rint(x);
-	ret->y = rint(y);
+	ret->x = (int)rint(x);
+	ret->y = (int)rint(y);
 }
 
 static void perspective_unmap(const double *c,
@@ -121,7 +121,7 @@ static void perspective_unmap(const double *c,
  * Span-based floodfill routine
  */
 
-#define FLOOD_FILL_MAX_DEPTH		4096
+#define FLOOD_FILL_MAX_DEPTH		100
 
 typedef void (*span_func_t)(void *user_data, int y, int left, int right);
 
@@ -179,48 +179,68 @@ static void flood_fill_seed(struct quirc *q, int x, int y, int from, int to,
 
 static void threshold(struct quirc *q)
 {
-	int x, y;
-	int avg_w = 0;
-	int avg_u = 0;
-	int threshold_s = q->w / THRESHOLD_S_DEN;
-	quirc_pixel_t *row = q->pixels;
+    int x, y;
+    quirc_pixel_t *row = q->pixels;
+    for (y = 0; y < q->h; y++) {
+    	for (x = 0; x < q->w; x++) {
+            if (row[x] < 127)
+            {
+                row[x] = QUIRC_PIXEL_BLACK;
+            }
+            else
+            {
+                row[x] = QUIRC_PIXEL_WHITE;
+            }
+    	}
+    	row += q->w;
+    }
 
-	for (y = 0; y < q->h; y++) {
-		int row_average[q->w];
-
-		memset(row_average, 0, sizeof(row_average));
-
-		for (x = 0; x < q->w; x++) {
-			int w, u;
-
-			if (y & 1) {
-				w = x;
-				u = q->w - 1 - x;
-			} else {
-				w = q->w - 1 - x;
-				u = x;
-			}
-
-			avg_w = (avg_w * (threshold_s - 1)) /
-				threshold_s + row[w];
-			avg_u = (avg_u * (threshold_s - 1)) /
-				threshold_s + row[u];
-
-			row_average[w] += avg_w;
-			row_average[u] += avg_u;
-		}
-
-		for (x = 0; x < q->w; x++) {
-			if (row[x] < row_average[x] *
-			    (100 - THRESHOLD_T) / (200 * threshold_s))
-				row[x] = QUIRC_PIXEL_BLACK;
-			else
-				row[x] = QUIRC_PIXEL_WHITE;
-		}
-
-		row += q->w;
-	}
 }
+////static void threshold(struct quirc *q)
+////{
+////	int x, y;
+////	int avg_w = 0;
+////	int avg_u = 0;
+////	int threshold_s = q->w / THRESHOLD_S_DEN;
+////	quirc_pixel_t *row = q->pixels;
+////
+////    int* row_average = malloc(sizeof(int) * q->w);
+////    for (y = 0; y < q->h; y++) {
+////
+////		memset(row_average, 0, sizeof(int) * q->w);
+////
+////		for (x = 0; x < q->w; x++) {
+////			int w, u;
+////
+////			if (y & 1) {
+////				w = x;
+////				u = q->w - 1 - x;
+////			} else {
+////				w = q->w - 1 - x;
+////				u = x;
+////			}
+////
+////			avg_w = (avg_w * (threshold_s - 1)) /
+////				threshold_s + row[w];
+////			avg_u = (avg_u * (threshold_s - 1)) /
+////				threshold_s + row[u];
+////
+////			row_average[w] += avg_w;
+////			row_average[u] += avg_u;
+////		}
+////
+////		for (x = 0; x < q->w; x++) {
+////			if (row[x] < row_average[x] *
+////			    (100 - THRESHOLD_T) / (200 * threshold_s))
+////				row[x] = QUIRC_PIXEL_BLACK;
+////			else
+////				row[x] = QUIRC_PIXEL_WHITE;
+////		}
+////
+////		row += q->w;
+////	}
+////    free(row_average);
+////}
 
 static void area_count(void *user_data, int y, int left, int right)
 {

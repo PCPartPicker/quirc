@@ -142,6 +142,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <CustomBuild Include="QuircCopyright.txt">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">robocopy "$(ProjectDir)." "$(OutDir)." %(Identity)
+IF %ERRORLEVEL% LEQ 3 set errorlevel=0
+if %errorlevel% neq 0 exit /b %errorlevel%</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">robocopy "$(ProjectDir)." "$(OutDir)." %(Identity)
+IF %ERRORLEVEL% LEQ 3 set errorlevel=0
+if %errorlevel% neq 0 exit /b %errorlevel%</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">robocopy "$(ProjectDir)." "$(OutDir)." %(Identity)
+IF %ERRORLEVEL% LEQ 3 set errorlevel=0
+if %errorlevel% neq 0 exit /b %errorlevel%</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">robocopy "$(ProjectDir)." "$(OutDir)." %(Identity)
+IF %ERRORLEVEL% LEQ 3 set errorlevel=0
+if %errorlevel% neq 0 exit /b %errorlevel%</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)%(Identity)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)%(Identity)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)%(Identity)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)%(Identity)</Outputs>
+    </CustomBuild>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
